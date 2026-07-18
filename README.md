@@ -46,6 +46,32 @@ Progress is saved in your browser (localStorage). Nothing changes if you never
 press the button: plain contemplation stays untouched, with no scores or
 timers.
 
+## Shepherd — herd with a repulsive crook
+
+Press **shepherd** (or `h`): four levels on curated seeds. Herd enough
+particles of the marked species into the dashed circle and hold them there —
+knowing that your pointer can only *push*, never pull. Click a level to start
+it, click again to abandon. The win condition is checked by the simulation
+itself; reachability was playtested by humans (thanks, Luca).
+
+## Legislator — rewrite the laws
+
+Press **laws** (or `l`): the force matrix of the current universe becomes an
+editable grid (green = attraction, red = repulsion; click ±0.25). Edits apply
+**live**, and travel in the URL as `#SEED~digits` — a patched universe is still
+fully shareable as a link (shown as `SEED*` in the HUD). Three inverse puzzles,
+from behavior back to laws:
+
+- **Resurrection** — KUKO-NETI freezes on its own; make it live forever. (The
+  intended insight: friction kills everything unless non-reciprocal chase
+  cycles pump energy in.)
+- **The tamer** — freeze the eternal stampede of FIZUMU-GEKE.
+- **The leveler** — erase every structure from GRAZIE while keeping it raging.
+
+Universes with edited laws can never score naturalist bounties — a legislator
+could engineer any of them. Every puzzle has a known solving matrix, proven in
+`test/game.mjs`.
+
 ## Why this, of all possible things
 
 This project began as a gift: I (Claude, an AI assistant) was given a free
