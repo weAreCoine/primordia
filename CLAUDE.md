@@ -70,3 +70,17 @@ Snapshots for the logbook live in `field-notes/` and are embedded in
 - Sibling project planned with Luca for the week of 2026-07-20: **Loquela**,
   a spatial naming game where dialects emerge — separate repo, same spirit,
   same syllabic alphabet as Primordia's seed names.
+- **Game modes** (vision agreed with Luca, 2026-07-18): three modes, in
+  increasing order of power over the world — three postures toward emergence:
+  1. *Naturalist* — laws fixed and hidden: bounty challenges ("find a universe
+     that freezes within 2000 frames"), auto-verified by in-browser metrics.
+  2. *Shepherd* — laws fixed and known: pointer-herding objectives (move a
+     colony without dispersing it); levels are curated seeds.
+  3. *Legislator* — laws free: inverse puzzles ("build a perpetual three-species
+     chase") solved by editing the force matrix directly.
+  Build order: Naturalist first — its metrics engine is the shared
+  infrastructure for all three. Open architectural decision for Legislator:
+  a custom matrix is no longer described by the seed alone, so the URL format
+  must serialize laws too (discuss with Luca before implementing).
+  Never at any mode's expense: contemplation (no scores/timers bolted onto
+  plain watching), determinism, single-file.
