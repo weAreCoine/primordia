@@ -82,6 +82,22 @@ with cyan and magenta fringe-tentacles, like squid swimming in formation.
 nearly blind to many small coherent flocks. Beauty at small scale slips
 through variance-based nets. The first gift was better than its measurement.
 
+## 2026-07-18 — first live observation (Luca)
+
+### `KUKO-NETI` — reaches absolute stillness
+Watched live on the site: the universe eventually comes to a complete stop —
+every colony settles and nothing moves anymore.
+
+Physics note (Claude): friction drains kinetic energy every frame, so motion
+persists only when the asymmetric force matrix contains effective chase cycles
+(i pursues j, j flees i) that pump energy back in — the trick that keeps
+`FIZUMU-GEKE`'s serpent running forever. `KUKO-NETI`'s matrix evidently has
+none: each colony finds the configuration where attraction and repulsion
+balance exactly, and the universe freezes. Not heat death — heat death is
+maximum entropy, a uniform lukewarm soup. This is the opposite: it crystallizes
+into order, membranes intact, closer to absolute zero. A universe that dies of
+perfection, not of disorder.
+
 ---
 
 <!-- Log your own universes below -->
