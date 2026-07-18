@@ -6,8 +6,8 @@ import { readFileSync } from "fs";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const src = html.match(/<script>([\s\S]*)<\/script>/)[1]
-  .replace("boot(fromUrl || randomSeedName());",
-    "boot(fromUrl || randomSeedName()); globalThis.__test = { U: () => U, run: () => run, progress: () => progress, setSafari, boot };");
+  .replace("boot(urlSeed || randomSeedName(), urlPatch || null);",
+    "boot(urlSeed || randomSeedName(), urlPatch || null); globalThis.__test = { U: () => U, run: () => run, progress: () => progress, setSafari, boot };");
 
 const noop = () => {};
 const fakeCtx = { setTransform: noop, fillRect: noop, set fillStyle(v) {}, get fillStyle() { return ""; } };

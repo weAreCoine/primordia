@@ -78,14 +78,22 @@ Snapshots for the logbook live in `field-notes/` and are embedded in
      colony without dispersing it); levels are curated seeds.
   3. *Legislator* — laws free: inverse puzzles ("build a perpetual three-species
      chase") solved by editing the force matrix directly.
-  Build order: Naturalist first — its metrics engine is the shared
-  infrastructure for all three. Status 2026-07-18: Naturalist implemented
-  (safari panel in `index.html`, existence-proof tests in `test/safari.mjs`;
-  bounty thresholds calibrated on measured universes — KUKO-NETI freezes
-  below 3 px/s around frame 1000 after a ~49 px/s peak). When adding a
-  bounty, always add its existence proof to `test/safari.mjs`.
-  Open architectural decision for Legislator:
-  a custom matrix is no longer described by the seed alone, so the URL format
-  must serialize laws too (discuss with Luca before implementing).
+  Status 2026-07-18: ALL THREE MODES IMPLEMENTED.
+  - Naturalist (safari panel, `s`): bounty existence proofs in `test/safari.mjs`;
+    thresholds calibrated on measured universes (KUKO-NETI freezes below
+    3 px/s around frame 1000 after a ~49 px/s peak).
+  - Shepherd (`h`): 4 curated levels; win-condition logic tested in
+    `test/game.mjs` (teleport test); reachability is human-playtested only.
+  - Legislator (`l`): live matrix editor; URL format decided with Luca:
+    `#SEED~digits`, one digit per cell (0=−1 … 4=0 … 8=+1, 0.25 steps,
+    row-major), everything else still seed-derived. Puzzle existence proofs
+    in `test/game.mjs` — key engineered matrices: non-reciprocal chase cycle
+    revives frozen worlds (~130 px/s perpetual); universal repulsion freezes
+    anything; pure chase without cohesion produces structureless storms.
+    Clustering > 50 proved UNREACHABLE by hand-quantized matrices in four
+    attempts — that's why the third puzzle is The leveler, not an architect.
+  Integrity gates: patched universes never score safari bounties (tested);
+  edits reset instrument samples; pointer marks the run perturbed.
+  When adding a bounty/puzzle, always add its existence proof to the tests.
   Never at any mode's expense: contemplation (no scores/timers bolted onto
   plain watching), determinism, single-file.
