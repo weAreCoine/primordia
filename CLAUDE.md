@@ -79,7 +79,12 @@ Snapshots for the logbook live in `field-notes/` and are embedded in
   3. *Legislator* — laws free: inverse puzzles ("build a perpetual three-species
      chase") solved by editing the force matrix directly.
   Build order: Naturalist first — its metrics engine is the shared
-  infrastructure for all three. Open architectural decision for Legislator:
+  infrastructure for all three. Status 2026-07-18: Naturalist implemented
+  (safari panel in `index.html`, existence-proof tests in `test/safari.mjs`;
+  bounty thresholds calibrated on measured universes — KUKO-NETI freezes
+  below 3 px/s around frame 1000 after a ~49 px/s peak). When adding a
+  bounty, always add its existence proof to `test/safari.mjs`.
+  Open architectural decision for Legislator:
   a custom matrix is no longer described by the seed alone, so the URL format
   must serialize laws too (discuss with Luca before implementing).
   Never at any mode's expense: contemplation (no scores/timers bolted onto

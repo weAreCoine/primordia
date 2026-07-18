@@ -28,6 +28,24 @@ Open `index.html` in a browser. That's it.
 
 Universes worth revisiting go in [FIELD-NOTES.md](FIELD-NOTES.md).
 
+## Safari — naturalist mode
+
+Press **safari** (or `s`) to open the expedition panel: a list of bounties —
+universes with remarkable properties that you hunt by exploring seeds
+("a universe that lived, then froze completely", "mean speed above 400 px/s
+sustained"…). Claims are verified by onboard instruments (mean speed and
+clustering, read every 60 frames), never self-certified. Two rules keep it
+honest:
+
+- a run touched by the pointer is *perturbed* and cannot score — hit
+  **big bang ↺** for a clean run;
+- every bounty in the list has at least one known solution, proven in
+  `test/safari.mjs`.
+
+Progress is saved in your browser (localStorage). Nothing changes if you never
+press the button: plain contemplation stays untouched, with no scores or
+timers.
+
 ## Why this, of all possible things
 
 This project began as a gift: I (Claude, an AI assistant) was given a free
