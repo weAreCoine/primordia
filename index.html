@@ -40,6 +40,23 @@
   #hint { margin-top: 8px; color: var(--dim); font-size: 10px; }
   #hud.min > :not(h1) { display: none; }
   #hud h1 { cursor: pointer; }
+
+  #safari {
+    position: fixed; top: 14px; right: 14px;
+    background: var(--panel); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+    padding: 12px 14px; font-size: 12px; line-height: 1.5;
+    user-select: none; width: 300px; display: none;
+  }
+  #safari.open { display: block; }
+  #safari h2 { font-size: 12px; letter-spacing: 3px; color: var(--accent); margin-bottom: 6px; }
+  #instruments { color: var(--dim); font-size: 11px; margin-bottom: 6px; min-height: 15px; }
+  #bounties { list-style: none; }
+  #bounties li { padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+  #bounties .t { color: var(--ink); }
+  #bounties li.found .t { color: var(--accent); }
+  #bounties .d { color: var(--dim); font-size: 10.5px; }
+  #safari .note { margin-top: 8px; color: var(--dim); font-size: 10px; }
 </style>
 </head>
 <body>
@@ -54,12 +71,21 @@
     <button id="btnNew">new universe</button>
     <button id="btnRestart">big bang ↺</button>
     <button id="btnPause">pause</button>
+    <button id="btnSafari">safari</button>
   </div>
   <div class="controls">
     <input id="seedInput" placeholder="seed…" spellcheck="false">
     <button id="btnGo">go</button>
   </div>
-  <div id="hint">drag to perturb · space = pause · n = new<br>the seed lives in the URL: share it</div>
+  <div id="hint">drag to perturb · space = pause · n = new · s = safari<br>the seed lives in the URL: share it</div>
+</div>
+
+<div id="safari">
+  <h2>EXPEDITIONS</h2>
+  <div id="instruments">instruments warming up…</div>
+  <ul id="bounties"></ul>
+  <div class="note">readings every 60 frames · perturbed runs don't count —
+  big bang ↺ to reset · progress stays in your browser</div>
 </div>
 
 <script>
@@ -246,13 +272,161 @@ let last = performance.now();
 function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.033);
   last = now;
-  if (!paused) { step(dt); draw(); }
+  if (!paused) { step(dt); draw(); safariTick(); }
   requestAnimationFrame(loop);
+}
+
+/* ---------- Safari: naturalist mode ---------- */
+// Expedition bounties, verified by onboard instruments — never self-certified.
+// A run touched by the pointer is marked perturbed and cannot score bounties.
+
+let safariActive = false;
+let run = null;              // per-universe expedition state, reset by boot()
+
+let storage = null;
+try { storage = window.localStorage || null; } catch (e) { storage = null; }
+let progress = {};
+try { progress = JSON.parse((storage && storage.getItem("primordia.safari.progress")) || "{}"); }
+catch (e) { progress = {}; }
+function saveProgress() {
+  try { storage && storage.setItem("primordia.safari.progress", JSON.stringify(progress)); }
+  catch (e) { /* private browsing: progress lives for this session only */ }
+}
+
+function newRun() {
+  return { frames: 0, samples: [], peakSpeed: 0, perturbed: false };
+}
+
+// True if pred holds for the last n consecutive samples.
+function sustained(n, pred) {
+  const s = run.samples;
+  if (s.length < n) return false;
+  for (let i = s.length - n; i < s.length; i++) if (!pred(s[i])) return false;
+  return true;
+}
+
+// Thresholds calibrated on real universes (see FIELD-NOTES.md):
+// KUKO-NETI peaks at ~49 px/s then settles below 3 px/s around frame 1000.
+const BOUNTIES = [
+  { id: "absolute-zero", title: "Absolute zero",
+    desc: "A universe that lived, then froze completely.",
+    test: () => run.peakSpeed > 20 && sustained(5, s => s.speed < 3) },
+  { id: "stampede", title: "Perpetual stampede",
+    desc: "Mean speed above 400 px/s for ten straight readings.",
+    test: () => sustained(10, s => s.speed > 400) },
+  { id: "metropolis", title: "Metropolis",
+    desc: "Clustering above 35: few, enormous gatherings.",
+    test: () => sustained(3, s => s.clustering > 35) },
+  { id: "drifting-fog", title: "Drifting fog",
+    desc: "Almost no structure (clustering < 2.5), yet still drifting.",
+    test: () => sustained(5, s => s.clustering < 2.5 && s.speed >= 10 && s.speed <= 120) },
+  { id: "crowded-ark", title: "Crowded ark",
+    desc: "Seven species, and still an organized world.",
+    test: () => U.nSpecies === 7 && sustained(3, s => s.clustering > 15) },
+];
+
+// Same definition as test/explore.mjs: variance/mean of neighbor counts
+// within 25px, computed with a coarse grid instead of O(n²).
+function computeMetrics() {
+  const { n, px, py, vx, vy } = U;
+  let speed = 0;
+  for (let i = 0; i < n; i++) speed += Math.hypot(vx[i], vy[i]);
+  speed /= n;
+
+  const R = 25, R2 = R * R;
+  const gw = Math.max(1, Math.ceil(W / R)), gh = Math.max(1, Math.ceil(H / R));
+  const heads = new Int32Array(gw * gh).fill(-1), next = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    const cx = Math.min(gw - 1, Math.max(0, Math.floor(px[i] / R)));
+    const cy = Math.min(gh - 1, Math.max(0, Math.floor(py[i] / R)));
+    const c = cy * gw + cx;
+    next[i] = heads[c]; heads[c] = i;
+  }
+  let mean = 0, m2 = 0, count = 0;
+  for (let i = 0; i < n; i++) {
+    const cx = Math.floor(px[i] / R), cy = Math.floor(py[i] / R);
+    let cnt = 0;
+    for (let oy = -1; oy <= 1; oy++) {
+      const gy = ((cy + oy) % gh + gh) % gh;
+      for (let ox = -1; ox <= 1; ox++) {
+        const gx = ((cx + ox) % gw + gw) % gw;
+        for (let j = heads[gy * gw + gx]; j !== -1; j = next[j]) {
+          if (j === i) continue;
+          let dx = px[j] - px[i]; dx -= W * Math.round(dx / W);
+          let dy = py[j] - py[i]; dy -= H * Math.round(dy / H);
+          if (dx * dx + dy * dy < R2) cnt++;
+        }
+      }
+    }
+    count++;
+    const delta = cnt - mean;
+    mean += delta / count;               // Welford: single pass, no second loop
+    m2 += delta * (cnt - mean);
+  }
+  const variance = count > 0 ? m2 / count : 0;
+  return { speed, clustering: variance / Math.max(mean, 0.01) };
+}
+
+function safariTick() {
+  if (!run) return;
+  run.frames++;
+  if (!safariActive || run.frames % 60 !== 0) return;
+  const m = computeMetrics();
+  run.peakSpeed = Math.max(run.peakSpeed, m.speed);
+  run.samples.push(m);
+  if (run.samples.length > 200) run.samples.shift();
+  updateInstruments(m);
+  if (!run.perturbed) checkBounties();
+}
+
+function checkBounties() {
+  let newly = false;
+  for (const b of BOUNTIES) {
+    if (progress[b.id]) continue;
+    if (b.test()) {
+      progress[b.id] = { seed: U.seedName, date: new Date().toISOString().slice(0, 10) };
+      newly = true;
+    }
+  }
+  if (newly) { saveProgress(); renderBounties(); }
 }
 
 /* ---------- UI ---------- */
 
 const $ = (id) => document.getElementById(id);
+
+function updateInstruments(m) {
+  $("instruments").textContent =
+    `speed ${m.speed.toFixed(0)} px/s · clustering ${m.clustering.toFixed(1)}` +
+    (run.perturbed ? " · perturbed ✋ bounties off" : "");
+}
+
+function renderBounties() {
+  const ul = $("bounties");
+  ul.textContent = "";
+  for (const b of BOUNTIES) {
+    const li = document.createElement("li");
+    const found = progress[b.id];
+    if (found) li.className = "found";
+    const t = document.createElement("div");
+    t.className = "t";
+    t.textContent = (found ? "✓ " : "· ") + b.title;
+    const d = document.createElement("div");
+    d.className = "d";
+    d.textContent = found ? `found in ${found.seed} (${found.date})` : b.desc;
+    li.appendChild(t); li.appendChild(d);
+    ul.appendChild(li);
+  }
+}
+
+function setSafari(on) {
+  safariActive = on;
+  $("safari").classList.toggle("open", on);
+  $("btnSafari").textContent = on ? "safari ✓" : "safari";
+  try { storage && storage.setItem("primordia.safari.active", on ? "1" : ""); }
+  catch (e) { /* ignore */ }
+  if (on) renderBounties();
+}
 
 function describeLaws() {
   return `${U.nSpecies} species · ${U.n} particles · radius ${U.rMax.toFixed(0)}px`;
@@ -260,14 +434,17 @@ function describeLaws() {
 
 function boot(seedName) {
   U = makeUniverse(seedName);
+  run = newRun();
   ctx.fillStyle = "#05070c"; ctx.fillRect(0, 0, W, H);
   $("seedName").textContent = seedName;
   $("laws").textContent = describeLaws();
   $("seedInput").value = seedName;
+  $("instruments").textContent = "instruments warming up…";
   history.replaceState(null, "", "#" + encodeURIComponent(seedName));
 }
 
 $("btnNew").addEventListener("click", () => boot(randomSeedName()));
+$("btnSafari").addEventListener("click", () => setSafari(!safariActive));
 $("btnRestart").addEventListener("click", () => boot(U.seedName));
 $("btnPause").addEventListener("click", togglePause);
 $("btnGo").addEventListener("click", () => {
@@ -289,10 +466,12 @@ function togglePause() {
 window.addEventListener("keydown", (e) => {
   if (e.key === " ") { e.preventDefault(); togglePause(); }
   if (e.key === "n") boot(randomSeedName());
+  if (e.key === "s") setSafari(!safariActive);
 });
 
 canvas.addEventListener("pointerdown", (e) => {
   pointer.active = true; pointer.x = e.clientX; pointer.y = e.clientY;
+  if (run) run.perturbed = true;   // scientific integrity: touched runs don't score
 });
 canvas.addEventListener("pointermove", (e) => {
   pointer.x = e.clientX; pointer.y = e.clientY;
@@ -302,6 +481,7 @@ window.addEventListener("pointerup", () => { pointer.active = false; });
 /* ---------- Go ---------- */
 
 const fromUrl = decodeURIComponent(location.hash.slice(1)).trim().toUpperCase();
+setSafari(!!(storage && storage.getItem("primordia.safari.active") === "1"));
 boot(fromUrl || randomSeedName());
 requestAnimationFrame(loop);
 </script>
