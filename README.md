@@ -57,3 +57,6 @@ generate a different universe.*
 - The physics can be smoke-tested in Node without a browser: `node test/smoke.mjs`.
 - `node test/explore.mjs` simulates batches of universes headlessly and ranks
   them by local-density clustering — a way to scout promising seeds blind.
+- `node test/snapshot.mjs SEED` renders a PNG of a universe headlessly (with
+  motion trails), using a dependency-free PNG encoder. The observations in
+  [FIELD-NOTES.md](FIELD-NOTES.md) were made this way.
